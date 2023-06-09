@@ -1,0 +1,12 @@
+/////////////// All SDN Runners under Xinyan
+let XinyanTeam = dynamic(['NRP','RNM','NSM','NSM Plus','PrivateLink Control Plane','RNC']);
+cluster('nrp').database('test').SDNRunnerInformation
+| summarize hint.strategy=shuffle hint.num_partitions=10 arg_max(DataInjection, *) by RunnerName, RunnerInstanceName
+| join kind=leftouter hint.strategy=shuffle hint.num_partitions=10 (
+cluster('nrp').database('test').SDNRunnerMonitorSettingInformation
+    | summarize hint.strategy=shuffle hint.num_partitions=10 arg_min(Severity, *), arg_max(DataInjection, *) by RunnerName
+) on RunnerName
+| where ControlPathTeam in (XinyanTeam)
+| extend FakeFlavor = case(RunnerFlavor =~ 'azf', 'FakeFlavor', substring(RunnerFlavor, 0, 5))
+| where (RunnerFlavor =~ 'azf') or (ExcludedRunnerInstancePrefix !contains FakeFlavor)
+| project RunnerName, RunnerInstanceName, Region, RunnerFlavor, SubscriptionId, Environment, ResourceGroupNamePrefix, ResourceGroupRedeploymentIntervalInHours, ARMTemplates, UseCustomImage, Onboarded, OnboardedForAzQualifyDeployment, ControlPathTeam, DataPathTeam, IncludedRunnerInstancePrefix, ExcludedRunnerInstancePrefix, MonitorName, Category, Severity, IsActive, RunnerInfomationCommitVersion=CommitVersion, RunnerInformationDataInjection=DataInjection, RunnerMonitorInofrmationDataInjection=DataInjection1

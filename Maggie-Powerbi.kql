@@ -1,0 +1,12 @@
+// list runner information
+cluster('nrp.kusto.windows.net').database('test').SDNRunnerInformation 
+
+// list runner mopnitor information
+cluster('nrp.kusto.windows.net').database('test').SDNRunnerMonitorSettingInformation 
+
+// list all Runner information under Xinyan
+cluster('nrp.kusto.windows.net').database('test').SDNRunnerOnboardStatus1
+
+// all Runner Quality Information
+cluster('aznwsdn.kusto.windows.net').database('aznwmds').GetRunnerDeployMetrics()
+| where Timestamp > ago(1d)
